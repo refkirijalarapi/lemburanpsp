@@ -151,31 +151,31 @@
     </div>
     
 </div>
-
 <script>
     const GajiPokok = 3520000;
     const UpahPerJam = GajiPokok / 173;
 
+    // UPDATE: Rentang tanggal diubah menjadi mulai tanggal 11
     const periodData = {
-        'september-oktober-2025': {start: '16 Sep', end: '15 Okt'},
-        'oktober-november-2025': {start: '16 Okt', end: '15 Nov'},
-        'november-desember-2025': {start: '16 Nov', end: '15 Des'},
-        'desember-januari-2026': {start: '16 Des', end: '15 Jan'},
-        'januari-februari-2026': {start: '16 Jan', end: '15 Feb'},
-        'februari-maret-2026': {start: '16 Feb', end: '15 Mar'},
-        'maret-april-2026': {start: '16 Mar', end: '15 Apr'},
-        'april-mei-2026': {start: '16 Apr', end: '15 Mei'},
-        'mei-juni-2026': {start: '16 Mei', end: '15 Jun'},
-        'juni-juli-2026': {start: '16 Jun', end: '15 Jul'},
-        'juli-agustus-2026': {start: '16 Jul', end: '15 Agt'},
-        'agustus-september-2026': {start: '16 Agt', end: '15 Sep'},
-        'september-oktober-2026': {start: '16 Sep', end: '15 Okt'},
-        'oktober-november-2026': {start: '16 Okt', end: '15 Nov'},
-        'november-desember-2026': {start: '16 Nov', end: '15 Des'}
+        'september-oktober-2025': {start: '11 Sep', end: '10 Okt'},
+        'oktober-november-2025': {start: '11 Okt', end: '10 Nov'},
+        'november-desember-2025': {start: '11 Nov', end: '10 Des'},
+        'desember-januari-2026': {start: '11 Des', end: '10 Jan'},
+        'januari-februari-2026': {start: '11 Jan', end: '10 Feb'},
+        'februari-maret-2026': {start: '11 Feb', end: '10 Mar'},
+        'maret-april-2026': {start: '11 Mar', end: '10 Apr'},
+        'april-mei-2026': {start: '11 Apr', end: '10 Mei'},
+        'mei-juni-2026': {start: '11 Mei', end: '10 Jun'},
+        'juni-juli-2026': {start: '11 Jun', end: '10 Jul'},
+        'juli-agustus-2026': {start: '11 Jul', end: '10 Agt'},
+        'agustus-september-2026': {start: '11 Agt', end: '10 Sep'},
+        'september-oktober-2026': {start: '11 Sep', end: '10 Okt'},
+        'oktober-november-2026': {start: '11 Okt', end: '10 Nov'},
+        'november-desember-2026': {start: '11 Nov', end: '10 Des'}
     };
 
     let overtimeData = JSON.parse(localStorage.getItem('overtimeData')) || {};
-    let currentNetHours = 0;
+    let tempNetHours = 0;
 
     function hitungBiaya(jam, isHoliday) {
         if (isHoliday) {
@@ -193,48 +193,39 @@
         const mulai = document.getElementById('jam-mulai').value;
         const selesai = document.getElementById('jam-selesai').value;
         const isHoliday = document.getElementById('is-holiday').checked;
-        const infoPotongan = document.getElementById('info-potongan');
-
+        
         if (mulai && selesai) {
             let [h1, m1] = mulai.split(':').map(Number);
             let [h2, m2] = selesai.split(':').map(Number);
-            let t1 = h1 * 60 + m1; // Menit mulai
-            let t2 = h2 * 60 + m2; // Menit selesai
-            if (t2 < t1) t2 += 1440; // Jika lewat tengah malam
+            let t1 = h1 * 60 + m1;
+            let t2 = h2 * 60 + m2;
+            if (t2 < t1) t2 += 1440;
 
             let durasiKotor = (t2 - t1) / 60;
             let potongan = 0;
-            let ketPotongan = "Tidak ada potongan istirahat";
+            let ketPotongan = "Tanpa potongan";
 
             if (isHoliday) {
-                // Aturan: Potong 1 Jam jika melewati rentang 11:45 - 12:45
-                let breakStart = 11 * 60 + 45; // 11:45
-                let breakEnd = 12 * 60 + 45;   // 12:45
-                
-                if (t1 < breakEnd && t2 > breakStart) {
+                if (t1 < 765 && t2 > 705) { 
                     potongan = 1;
-                    ketPotongan = "Potongan istirahat 1 jam (10:00-10:10, 11:45-12:25)";
+                    ketPotongan = "Potong 1 jam (Istirahat)";
                 }
             } else {
-                // Aturan Hari Biasa: Potong 0.5 Jam jika melewati rentang 18:00 - 18:30
-                let breakStartRegular = 18 * 60;
-                let breakEndRegular = 18.5 * 60;
-                
-                if (t1 < breakEndRegular && t2 > breakStartRegular) {
+                if (t1 < 1110 && t2 > 1080) { 
                     potongan = 0.5;
-                    ketPotongan = "Potongan istirahat 30 mnt (18:00-18:30)";
+                    ketPotongan = "Potong 30 mnt (18:00)";
                 }
             }
 
-            currentNetHours = Math.max(0, durasiKotor - potongan);
-            infoPotongan.innerText = ketPotongan;
-            document.getElementById('display-durasi').innerText = currentNetHours;
-            document.getElementById('calculated-cost').innerText = "Rp " + hitungBiaya(currentNetHours, isHoliday).toLocaleString('id-ID');
+            tempNetHours = Math.max(0, durasiKotor - potongan);
+            document.getElementById('info-potongan').innerText = ketPotongan;
+            document.getElementById('display-durasi').innerText = tempNetHours.toFixed(1);
+            document.getElementById('calculated-cost').innerText = "Rp " + hitungBiaya(tempNetHours, isHoliday).toLocaleString('id-ID');
         }
     }
 
-    [document.getElementById('jam-mulai'), document.getElementById('jam-selesai'), document.getElementById('is-holiday')].forEach(el => {
-        el.addEventListener('change', updateKalkulasi);
+    ['jam-mulai', 'jam-selesai', 'is-holiday'].forEach(id => {
+        document.getElementById(id).addEventListener('change', updateKalkulasi);
     });
 
     function render() {
@@ -255,12 +246,12 @@
                     </div>
                     <div class="overtime-hours">${item.jam} j</div>
                     <div class="overtime-cost">Rp ${item.biaya.toLocaleString('id-ID')}</div>
-                    <button class="delete-button" onclick="hapus(${index})">×</button>
+                    <button class="delete-button" onclick="hapus('${period}', ${index})">×</button>
                 </div>`;
         });
 
         document.getElementById('total-overtime-cost').innerText = totalCost.toLocaleString('id-ID');
-        document.getElementById('total-overtime-hour').innerText = totalHours.toFixed(1).replace(/\.0+$/, '');
+        document.getElementById('total-overtime-hour').innerText = totalHours.toFixed(1);
         document.getElementById('total-salary').innerText = (GajiPokok + 51000 + totalCost).toLocaleString('id-ID');
         
         const dates = periodData[period] || {start: '-', end: '-'};
@@ -268,28 +259,32 @@
         document.getElementById('close-date').innerText = dates.end;
     }
 
-    function hapus(index) {
+    window.hapus = function(period, index) {
         if(confirm('Hapus data ini?')) {
-            overtimeData[document.getElementById('period-select').value].splice(index, 1);
+            overtimeData[period].splice(index, 1);
             localStorage.setItem('overtimeData', JSON.stringify(overtimeData));
             render();
         }
-    }
+    };
 
-    document.getElementById('save-overtime').onclick = () => {
-        const p = document.getElementById('period-select').value;
+    document.getElementById('save-overtime').onclick = function() {
+        const period = document.getElementById('period-select').value;
         const tgl = document.getElementById('TGL').value;
-        const mulai = document.getElementById('jam-mulai').value;
-        const selesai = document.getElementById('jam-selesai').value;
-        
-        if (!tgl || !mulai || !selesai || currentNetHours <= 0) return alert('Input tanggal dan jam dengan benar!');
+        const reason = document.getElementById('overtime-reason').value;
+        const isHoliday = document.getElementById('is-holiday').checked;
 
-        if (!overtimeData[p]) overtimeData[p] = [];
-        overtimeData[p].push({
+        if (!tgl || tempNetHours <= 0) {
+            alert('Lengkapi tanggal dan jam kerja!');
+            return;
+        }
+
+        if (!overtimeData[period]) overtimeData[period] = [];
+        
+        overtimeData[period].push({
             tanggal: tgl,
-            alasan: document.getElementById('overtime-reason').value,
-            jam: currentNetHours,
-            biaya: hitungBiaya(currentNetHours, document.getElementById('is-holiday').checked)
+            alasan: reason,
+            jam: tempNetHours.toFixed(1),
+            biaya: hitungBiaya(tempNetHours, isHoliday)
         });
 
         localStorage.setItem('overtimeData', JSON.stringify(overtimeData));
@@ -297,20 +292,47 @@
         render();
     };
 
+    document.getElementById('export-excel').onclick = function() {
+        const period = document.getElementById('period-select').value;
+        const data = overtimeData[period] || [];
+        if (data.length === 0) return alert('Tidak ada data!');
+
+        const exportData = data.map(item => ({
+            "Tanggal": item.tanggal,
+            "Keterangan": item.alasan,
+            "Jam (Nett)": item.jam,
+            "Upah (Rp)": item.biaya
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Lembur");
+        XLSX.writeFile(wb, `Lemburan_${period}.xlsx`);
+    };
+
     document.getElementById('add-button').onclick = () => document.getElementById('overtimeModal').style.display = 'block';
     document.getElementById('close-button').onclick = () => document.getElementById('overtimeModal').style.display = 'none';
     document.getElementById('period-select').onchange = render;
-    
-    // Auto select periode saat ini
-    const now = new Date();
-    const tgl = now.getDate();
-    const bln = now.getMonth();
-    const thn = now.getFullYear();
+
+    // UPDATE: Logika Inisialisasi Periode Otomatis (Ganti ke tanggal 11)
+    const d = new Date();
+    const tglSekarang = d.getDate();
+    const blnSekarang = d.getMonth();
     const bulanIndo = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
-    let target = tgl > 15 ? `${bulanIndo[bln]}-${bulanIndo[(bln + 1) % 12]}-${bln === 11 ? thn + 1 : thn}` : `${bulanIndo[bln === 0 ? 11 : bln - 1]}-${bulanIndo[bln]}-${thn}`;
+    
+    let target;
+    if (tglSekarang > 10) {
+        // Jika sudah tanggal 11 ke atas, masuk ke periode BulanIni-BulanDepan
+        target = `${bulanIndo[blnSekarang]}-${bulanIndo[(blnSekarang + 1) % 12]}-${blnSekarang === 11 ? d.getFullYear() + 1 : d.getFullYear()}`;
+    } else {
+        // Jika masih tanggal 1-10, masuk ke periode BulanLalu-BulanIni
+        target = `${bulanIndo[blnSekarang === 0 ? 11 : blnSekarang - 1]}-${bulanIndo[blnSekarang]}-${d.getFullYear()}`;
+    }
+    
     document.getElementById('period-select').value = target;
 
     render();
 </script>
+    
 </body>
 </html>
