@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catatan Lemburan Pasopati Metindo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        h1 { text-align: center; color: #333; font-size: 1.5rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; border-bottom: 2px solid #45f3ff; }
+        .header select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+        .total-gaji { text-align: center; font-size: 1.1em; margin-bottom: 5px; color: #555; }
+        .total-overtime-cost { text-align: center; font-size: 1.2em; margin-bottom: 10px; color: #555; }
+        .total-overtime-cost span { font-weight: bold; color: #28a745; }
+        .total-salary { text-align: center; font-size: 1.1em; font-weight: bold; margin-top: 20px; padding-top: 10px; border-top: 2px solid #45f3ff; color: #555; }
+        .overtime-list-container { border-top: 2px solid #45f3ff; padding-top: 10px; margin-bottom: 20px; }
+        .overtime-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .overtime-info { display: flex; flex-direction: column; flex-grow: 1; }
+        .overtime-date { font-weight: bold; color: #333; }
+        .overtime-reason { color: #666; font-size: 0.85em; }
+        .overtime-hours { font-weight: bold; color: #45f3ff; margin-right: 10px; font-size: 0.9em; }
+        .overtime-cost { font-weight: bold; color: #28a745; margin-right: 15px; }
+        .delete-button { background-color: #dc3545; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 0.8em; }
+        .add-button { display: block; width: 60px; height: 60px; margin: 20px auto; background-color: #45f3ff; color: #fff; border: none; border-radius: 50%; font-size: 2.5em; cursor: pointer; text-align: center; line-height: 60px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        
+        .export-button { display: block; width: 100%; margin-top: 10px; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em; }
+        
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow-y: auto; }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; position: relative; box-sizing: border-box; }
+        .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .time-range-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .time-input-group { flex: 1; }
+        input[type="time"], input[type="date"], input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }
+        
+        .holiday-toggle { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: #fff4f4; padding: 10px; border-radius: 8px; border: 1px solid #ffcccc; }
+        .summary-box { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #28a745; font-size: 0.9em; }
+        .save-button { background-color: #28a745; color: white; padding: 15px; border: none; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; font-size: 1.1em; }
+        .legal-text-container { margin-top: 30px; color: #ffffff; font-size: 0.85em; line-height: 1.6; padding: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Catatan Lemburan<br>Pasopati Metindo</h1>
+    <div class="header">
+        <div class="period-display" style="font-size: 0.9em;">
+            <span id="open-date"></span> - <span id="close-date"></span>
+        </div>
+        <select id="period-select">
+            <option value="september-oktober-2025">Sept - Okt 2025</option>
+            <option value="oktober-november-2025">Okt - Nov 2025</option>
+            <option value="november-desember-2025">Nov - Des 2025</option>
+            <option value="desember-januari-2026">Des 2025 - Jan 2026</option>
+            <option value="januari-februari-2026">Jan - Feb 2026</option>
+            <option value="februari-maret-2026">Feb - Mar 2026</option>
+            <option value="maret-april-2026">Mar - Apr 2026</option>
+            <option value="april-mei-2026">Apr - Mei 2026</option>
+            <option value="mei-juni-2026">Mei - Jun 2026</option>
+            <option value="juni-juli-2026">Jun - Jul 2026</option>
+            <option value="juli-agustus-2026">Jul - Agt 2026</option>
+            <option value="agustus-september-2026">Agt - Sep 2026</option>
+            <option value="september-oktober-2026">Sep - Okt 2026</option>
+            <option value="oktober-november-2026">Okt - Nov 2026</option>
+            <option value="november-desember-2026">Nov - Des 2026</option>
+        </select>
+    </div>
+
+    <div class="total-gaji">Gaji Pokok: Rp <span>3.520.000</span></div>
+    <div class="total-gaji">Tunjangan: Rp <span>51.000</span></div>
+    
+    <div class="overtime-list-container">
+        <div id="overtime-list"></div>
+    </div>
+    
+    <div class="total-overtime-cost">Total Lemburan: Rp <span id="total-overtime-cost">0</span></div>
+    <div class="total-overtime-cost">Total Jam: <span style="color: #45f3ff;" id="total-overtime-hour">0</span> Jam</div>
+    <div class="total-salary">Total Gaji (Tanpa GetPass/Izin): <br>Rp <span style="color: #28a745;" id="total-salary">0</span></div>
+
+    <button class="add-button" id="add-button">+</button>
+    <button id="export-excel" class="export-button">Export Excel Periode Ini</button>
+</div>
+
+<div class="legal-text-container">
+    <h3 style="color: #45f3ff; border-bottom: 1px solid #45f3ff; padding-bottom: 5px; font-size: 1.1em;">Referensi Hukum (PP No. 35 Tahun 2021)</h3>
+    <p><strong>Pasal 31 (Pengali Upah):</strong><br>
+    • Hari Kerja: Jam ke-1 (1,5x), jam berikutnya (2x).<br>
+    • Hari Libur: Jam 1-8 (2x), Jam ke-9 (3x), Jam ke-10 dst (4x).</p>
+</div>
+
+<div id="overtimeModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" id="close-button">&times;</span>
+        <h2 style="margin-top: 0;">Tambah Lemburan</h2>
+        
+        <label>Alasan Lembur:</label>
+        <input type="text" id="overtime-reason" value="Packaging Tmmin Export D90">
+        
+        <label>Tanggal:</label>
+        <input type="date" id="TGL">
+
+        <label>Waktu Lembur:</label>
+        <div class="time-range-container">
+            <div class="time-input-group">
+                <label>Mulai</label>
+                <input type="time" id="jam-mulai">
+            </div>
+            <div class="time-input-group">
+                <label>Selesai</label>
+                <input type="time" id="jam-selesai">
+            </div>
+        </div>
+
+        <div class="holiday-toggle">
+            <input type="checkbox" id="is-holiday">
+            <label for="is-holiday" style="font-weight: bold; color: #dc3545; cursor: pointer;">Lembur Hari Libur</label>
+        </div>
+        <div class="summary-box">
+            <div id="info-potongan" style="color: #666; font-style: italic; margin-bottom: 5px;">Potongan: -</div>
+            <div style="display:flex; justify-content: space-between;">
+                <span>Durasi Bersih:</span>
+                <span id="display-durasi" style="font-weight:bold;">0</span> Jam
+            </div>
+            <div style="display:flex; justify-content: space-between; margin-top: 5px;">
+                <span>Estimasi Biaya:</span>
+                <span id="calculated-cost" style="font-weight:bold; color: #28a745;">Rp 0</span>
+            </div>
+        </div>
+
+        <button class="save-button" id="save-overtime">Simpan Data</button>
+    </div>
+</div>
+
+<script>
+    const GajiPokok = 3520000;
+    const UpahPerJam = GajiPokok / 173;
+
+    // UPDATE: Rentang tanggal diubah menjadi mulai tanggal 11
+    const periodData = {
+        'september-oktober-2025': {start: '11 Sep', end: '10 Okt'},
+        'oktober-november-2025': {start: '11 Okt', end: '10 Nov'},
+        'november-desember-2025': {start: '11 Nov', end: '10 Des'},
+        'desember-januari-2026': {start: '11 Des', end: '10 Jan'},
+        'januari-februari-2026': {start: '11 Jan', end: '10 Feb'},
+        'februari-maret-2026': {start: '11 Feb', end: '10 Mar'},
+        'maret-april-2026': {start: '11 Mar', end: '10 Apr'},
+        'april-mei-2026': {start: '11 Apr', end: '10 Mei'},
+        'mei-juni-2026': {start: '11 Mei', end: '10 Jun'},
+        'juni-juli-2026': {start: '11 Jun', end: '10 Jul'},
+        'juli-agustus-2026': {start: '11 Jul', end: '10 Agt'},
+        'agustus-september-2026': {start: '11 Agt', end: '10 Sep'},
+        'september-oktober-2026': {start: '11 Sep', end: '10 Okt'},
+        'oktober-november-2026': {start: '11 Okt', end: '10 Nov'},
+        'november-desember-2026': {start: '11 Nov', end: '10 Des'}
+    };
+
+    let overtimeData = JSON.parse(localStorage.getItem('overtimeData')) || {};
+    let tempNetHours = 0;
+
+    function hitungBiaya(jam, isHoliday) {
+        if (isHoliday) {
+            let biaya = 0;
+            if (jam <= 8) biaya = jam * 2 * UpahPerJam;
+            else if (jam <= 9) biaya = (8 * 2 * UpahPerJam) + (3 * UpahPerJam);
+            else biaya = (8 * 2 * UpahPerJam) + (3 * UpahPerJam) + ((jam - 9) * 4 * UpahPerJam);
+            return Math.round(biaya);
+        }
+        if (jam <= 1) return Math.round(1.5 * jam * UpahPerJam);
+        return Math.round((1.5 * UpahPerJam) + ((jam - 1) * 2 * UpahPerJam));
+    }
+
+    function updateKalkulasi() {
+        const mulai = document.getElementById('jam-mulai').value;
+        const selesai = document.getElementById('jam-selesai').value;
+        const isHoliday = document.getElementById('is-holiday').checked;
+        
+        if (mulai && selesai) {
+            let [h1, m1] = mulai.split(':').map(Number);
+            let [h2, m2] = selesai.split(':').map(Number);
+            let t1 = h1 * 60 + m1;
+            let t2 = h2 * 60 + m2;
+            if (t2 < t1) t2 += 1440;
+
+            let durasiKotor = (t2 - t1) / 60;
+            let potongan = 0;
+            let ketPotongan = "Tanpa potongan";
+
+            if (isHoliday) {
+                if (t1 < 765 && t2 > 705) { 
+                    potongan = 1;
+                    ketPotongan = "Potong 1 jam (Istirahat)";
+                }
+            } else {
+                if (t1 < 1110 && t2 > 1080) { 
+                    potongan = 0.5;
+                    ketPotongan = "Potong 30 mnt (18:00)";
+                }
+            }
+
+            tempNetHours = Math.max(0, durasiKotor - potongan);
+            document.getElementById('info-potongan').innerText = ketPotongan;
+            document.getElementById('display-durasi').innerText = tempNetHours.toFixed(1);
+            document.getElementById('calculated-cost').innerText = "Rp " + hitungBiaya(tempNetHours, isHoliday).toLocaleString('id-ID');
+        }
+    }
+
+    ['jam-mulai', 'jam-selesai', 'is-holiday'].forEach(id => {
+        document.getElementById(id).addEventListener('change', updateKalkulasi);
+    });
+
+    function render() {
+        const period = document.getElementById('period-select').value;
+        const data = overtimeData[period] || [];
+        const list = document.getElementById('overtime-list');
+        list.innerHTML = '';
+        let totalCost = 0, totalHours = 0;
+
+        data.forEach((item, index) => {
+            totalCost += item.biaya;
+            totalHours += parseFloat(item.jam);
+            list.innerHTML += `
+                <div class="overtime-item">
+                    <div class="overtime-info">
+                        <span class="overtime-date">${item.tanggal}</span>
+                        <span class="overtime-reason">${item.alasan}</span>
+                    </div>
+                    <div class="overtime-hours">${item.jam} j</div>
+                    <div class="overtime-cost">Rp ${item.biaya.toLocaleString('id-ID')}</div>
+                    <button class="delete-button" onclick="hapus('${period}', ${index})">×</button>
+                </div>`;
+        });
+
+        document.getElementById('total-overtime-cost').innerText = totalCost.toLocaleString('id-ID');
+        document.getElementById('total-overtime-hour').innerText = totalHours.toFixed(1);
+        document.getElementById('total-salary').innerText = (GajiPokok + 51000 + totalCost).toLocaleString('id-ID');
+        
+        const dates = periodData[period] || {start: '-', end: '-'};
+        document.getElementById('open-date').innerText = dates.start;
+        document.getElementById('close-date').innerText = dates.end;
+    }
+
+    window.hapus = function(period, index) {
+        if(confirm('Hapus data ini?')) {
+            overtimeData[period].splice(index, 1);
+            localStorage.setItem('overtimeData', JSON.stringify(overtimeData));
+            render();
+        }
+    };
+
+    document.getElementById('save-overtime').onclick = function() {
+        const period = document.getElementById('period-select').value;
+        const tgl = document.getElementById('TGL').value;
+        const reason = document.getElementById('overtime-reason').value;
+        const isHoliday = document.getElementById('is-holiday').checked;
+
+        if (!tgl || tempNetHours <= 0) {
+            alert('Lengkapi tanggal dan jam kerja!');
+            return;
+        }
+
+        if (!overtimeData[period]) overtimeData[period] = [];
+        
+        overtimeData[period].push({
+            tanggal: tgl,
+            alasan: reason,
+            jam: tempNetHours.toFixed(1),
+            biaya: hitungBiaya(tempNetHours, isHoliday)
+        });
+
+        localStorage.setItem('overtimeData', JSON.stringify(overtimeData));
+        document.getElementById('overtimeModal').style.display = 'none';
+        render();
+    };
+
+    document.getElementById('export-excel').onclick = function() {
+        const period = document.getElementById('period-select').value;
+        const data = overtimeData[period] || [];
+        if (data.length === 0) return alert('Tidak ada data!');
+
+        const exportData = data.map(item => ({
+            "Tanggal": item.tanggal,
+            "Keterangan": item.alasan,
+            "Jam (Nett)": item.jam,
+            "Upah (Rp)": item.biaya
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Lembur");
+        XLSX.writeFile(wb, `Lemburan_${period}.xlsx`);
+    };
+
+    document.getElementById('add-button').onclick = () => document.getElementById('overtimeModal').style.display = 'block';
+    document.getElementById('close-button').onclick = () => document.getElementById('overtimeModal').style.display = 'none';
+    document.getElementById('period-select').onchange = render;
+
+    // UPDATE: Logika Inisialisasi Periode Otomatis (Ganti ke tanggal 11)
+    const d = new Date();
+    const tglSekarang = d.getDate();
+    const blnSekarang = d.getMonth();
+    const bulanIndo = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
+    
+    let target;
+    if (tglSekarang > 10) {
+        // Jika sudah tanggal 11 ke atas, masuk ke periode BulanIni-BulanDepan
+        target = `${bulanIndo[blnSekarang]}-${bulanIndo[(blnSekarang + 1) % 12]}-${blnSekarang === 11 ? d.getFullYear() + 1 : d.getFullYear()}`;
+    } else {
+        // Jika masih tanggal 1-10, masuk ke periode BulanLalu-BulanIni
+        target = `${bulanIndo[blnSekarang === 0 ? 11 : blnSekarang - 1]}-${bulanIndo[blnSekarang]}-${d.getFullYear()}`;
+    }
+    
+    document.getElementById('period-select').value = target;
+
+    render();
+</script>
+
+</body>
+</html>
